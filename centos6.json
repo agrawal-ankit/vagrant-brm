@@ -1,0 +1,42 @@
+{
+	"builders": [{
+		"type": "virtualbox-iso",
+		"guest_os_type": "RedHat_64",
+		"iso_checksum_type": "sha256",
+		"iso_checksum": "c0c1a05d3d74fb093c6232003da4b22b0680f59d3b2fa2cb7da736bc40b3f2c5",  
+		"iso_url": "file:///D:/Softwares/iso/CentOS-6.7-x86_64-bin-DVD1.iso",
+		"ssh_username": "vagrant",
+		"ssh_password": "vagrant",
+		"ssh_wait_timeout": "10000s",
+		"shutdown_command": "echo 'vagrant'|sudo -S /sbin/halt -h -p",
+		"virtualbox_version_file": ".vbox_version",
+		"http_directory": "http",
+		"boot_command": [
+		                 "<wait><esc><esc>",
+		                 "linux ks=http://{{.HTTPIP}}:{{.HTTPPort}}/ks6.cfg<enter>"
+		                 ]
+	}],
+	"provisioners"             : [{
+		"type": "shell",
+		"execute_command": "sh '{{ .Path }}'",
+		"inline": [
+		           "sleep 30 ",
+		           "sudo mkdir /tmp/vboxguest",
+		           "sudo mount -t iso9660 -o loop /home/vagrant/VBoxGuestAdditions.iso /tmp/vboxguest",
+		           "cd /tmp/vboxguest",
+		           "sudo ./VBoxLinuxAdditions.run",
+		           "cd /tmp",
+		           "sudo umount /tmp/vboxguest",
+		           "sudo rmdir /tmp/vboxguest",
+		           "rm /home/vagrant/VBoxGuestAdditions.iso",
+		           "echo Image Provisioned!"
+		           ]
+	}],
+
+	"post-processors": [
+	                    {
+	                    	"output": "builds/{{.Provider}}-centos6.7.box",
+	                    	"type": "vagrant"
+	                    }
+	                    ]
+}
